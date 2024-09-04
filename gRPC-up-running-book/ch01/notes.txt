@@ -54,3 +54,24 @@ service applications. With RPC a client can remotely invoke a function of a meth
 just like calling a local method.
 
 11. SOAP is the standard communication technique in a service-oriented architecture (SOA) to exchange XML-based structured data between services (usually called web services in the context of SOA) and communicates over any underlying communication protocol such as HTTP (most commonly used).
+
+12. Representational State Transfer (REST) is an architectural style that originated from
+Roy Fielding’s PhD dissertation. Fielding is one of the principal authors of the HTTP
+specification and the originator of the REST architectural style. REST is the founda‐
+tion of the resource-oriented architecture (ROA), where you model distributed appli‐
+cations as a collection of resources and the clients that access those resources can
+change the state (create, read, update, or delete) of those resources.
+
+13. Disadvantages of gRPC
+    - It may not be suitable for external-facing services
+    - Drastic service definition changes are a complicated development process
+    - The ecosystem is relatively small
+
+14. Summary
+    Modern software applications or services rarely live in isolation and the inter-process
+    communication techniques that connect them are one of the most important aspects
+    of modern distributed software applications. gRPC is a scalable, loosely coupled, and
+    type-safe solution that allows for more efficient inter-process communication than
+    conventional REST/HTTP-based communication. It allows you to connect, invoke,
+    operate, and debug distributed heterogeneous applications as easy as making a local
+    method call via network transport protocols such as HTTP/2.
