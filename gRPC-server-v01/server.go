@@ -59,13 +59,12 @@ func main() {
 		log.Fatalf("Error in establish the server %v", err)
 	}
 
+	log.Println("server running in port: 9002")
 	grpcServer := grpc.NewServer()
 	pb.RegisterCoffeShopServer(grpcServer, &server{})
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)
 	}
-
-	log.Println("server running in port: 9002")
 
 }
