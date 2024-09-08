@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package coffeeshop;
+
+option go_package = "github.com/shafey01/gRPC-in-Go/gRPC-server-v01/proto";
+
+service CoffeShop{
+
+// rpc getmenu
+rpc GetMenu(MenuRequest) returns (stream Menu){};
+
+// rpc placeorder
+rpc PlaceOrder(Order) returns (Receipt){};
+// rpc getorderstatus
+rpc GetOrderStatus(Receipt) returns (OrderStatus){};
+}
+
+// messages
+
+message  MenuRequest{}
+
+message Item{
+string id = 1;
+string name = 2;
+}
+
+message Menu{
+repeated Item items=1;
+}
+
+message Order{
+repeated Item items=1;
+}
+
+message Receipt{
+string id = 1;
+}
+
+message OrderStatus{
+string orderId = 1;
+string status = 2;
+}

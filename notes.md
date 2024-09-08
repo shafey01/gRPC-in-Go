@@ -141,3 +141,7 @@ change the state (create, read, update, or delete) of those resources.
     service contract between then (i.e., code generation from the same gRPC service
     This allows us to pick the appropriate implementation technology based
     on the business capability of the service.
+
+///////////////////////////////////////////////////////////////////////
+// Chapter 04 /////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
