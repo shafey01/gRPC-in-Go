@@ -7,6 +7,7 @@ import (
 
 	pb "github.com/shafey01/gRPC-in-Go/gRPC-server-v01/proto"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/reflection"
 )
 
 type server struct {
@@ -52,6 +53,13 @@ func (s *server) GetOrderStatus(ctx context.Context, recepit *pb.Receipt) (*pb.O
 	}, nil
 }
 
+// gRPC loggingInterceptor which helps to log
+func loggingInterceptor(ctx context.Context, req interface{},
+	info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
+	log.Printf("Received request: %v", req)
+	resp, err := handler(ctx, req)
+	return resp, err
+}
 func main() {
 
 	listener, err := net.Listen("tcp", ":9002")
@@ -60,8 +68,11 @@ func main() {
 	}
 
 	log.Println("server running in port: 9002")
-	grpcServer := grpc.NewServer()
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(loggingInterceptor),
+	)
 	pb.RegisterCoffeShopServer(grpcServer, &server{})
+	reflection.Register(grpcServer)
 
 	if err := grpcServer.Serve(listener); err != nil {
 		log.Fatalf("failed to server %v", err)
