@@ -1,10 +1,10 @@
-////////////////////////////////////////////////////////////////////////
-// gRPC: Up and Running book /////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+// gRPC: Up and Running book //////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 
 
-//////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 // Chapter 01 /////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
@@ -95,4 +95,49 @@ change the state (create, read, update, or delete) of those resources.
 2. According to the protocol buffer rule, we can only have one
    input parameter in a remote method and it can return only one value.
 
-3.
+3. Context object contains metadata such as the identity of the end user,
+   authorization tokens, and the request’s deadline and it will exist during the lifetime of the request.
+
+///////////////////////////////////////////////////////////////////////
+// Chapter 03 /////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+1. Simple RPC (Unary RPC)
+   when a client invokes a remote function of a server, the client sends a single request
+   to the server and gets a single response that is sent along with status details and trailing metadata.
+
+2. Server-Streaming RPC
+   In server-side streaming RPC, the server sends back a sequence of responses after getting the client’s request message.
+   This sequence of multiple responses is known as a “stream.” After sending all the
+   server responses, the server marks the end of the stream by sending the server’s status
+   details as trailing metadata to the client.
+
+3. Client-Streaming RPC
+   In client-streaming RPC, the client sends multiple messages to the server instead of a
+   single request. The server sends back a single response to the client.
+
+4. Bidirectional-Streaming RPC
+    In bidirectional-streaming RPC, the client is sending a request to the server as a
+    stream of messages. The server also responds with a stream of messages. The call has
+    to be initiated from the client side, but after that, the communication is completely
+    based on the application logic of the gRPC client and the server.
+- Each order ID is sent to the server as a separate gRPC message.
+- The service processes each order for the specified order ID and organizes them
+  into combined shipments based on the delivery location of the order.
+- The key idea behind this business use case is that once the RPC method is invoked
+  either the client or service can send messages at any arbitrary time. (This also
+  includes the end of stream markings from either of the parties.)
+
+5. Using gRPC for Microservices Communication
+    In most of the real-world use cases, these external-facing services are exposed
+    through an API gateway. That is the place where you apply various nonfunctional
+    capabilities such as security, throttling, versioning, and so on. Most such APIs lever‐
+    age protocols such as REST or GraphQL. Although it’s not very common, you may
+    also expose gRPC as an external-facing service, as long as the API gateway supports
+    exposing gRPC interfaces.
+6. By using an API gateway with your gRPC APIs, you are able to deploy this functionality
+    outside of your core gRPC services. One of the other important aspects of this architec‐
+    ture is that we can leverage multiple programming languages but share the same
+    service contract between then (i.e., code generation from the same gRPC service
+    This allows us to pick the appropriate implementation technology based
+    on the business capability of the service.
