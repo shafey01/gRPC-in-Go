@@ -6,6 +6,7 @@
 
 ///////////////////////////////////////////////////////////////////////
 // Chapter 01 /////////////////////////////////////////////////////////
+// Introduction to gRPC ///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 1. Microservices architecture is about building a software application
@@ -88,6 +89,7 @@ change the state (create, read, update, or delete) of those resources.
 
 ///////////////////////////////////////////////////////////////////////
 // Chapter 02 /////////////////////////////////////////////////////////
+// Getting Started with gRPC //////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 1. Message: is the data structure that is exchanged between client and service.
@@ -100,6 +102,7 @@ change the state (create, read, update, or delete) of those resources.
 
 ///////////////////////////////////////////////////////////////////////
 // Chapter 03 /////////////////////////////////////////////////////////
+// gRPC Communication Patterns ////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
 
 1. Simple RPC (Unary RPC)
@@ -144,4 +147,58 @@ change the state (create, read, update, or delete) of those resources.
 
 ///////////////////////////////////////////////////////////////////////
 // Chapter 04 /////////////////////////////////////////////////////////
+//gRPC: Under the Hood ////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
+1. In gRPC, all requests are HTTP POST requests with content-type prefixed with
+application/grpc. The remote function (/ProductInfo/getProduct) that it
+invokes is sent as a separate HTTP header.
+
+2. When the message is received at the server, the server examines the message
+headers to see which service function needs to be called and hands over the mes‐
+sage to the service stub.
+
+3. Message = Tag + Value
+   Tag = (Field Index << 3) | wire type // wire type like: 0 for int32, int64, uint32, uint64, sint32, sint64, bool, enum
+                                        // 2 for string, bytes, embedded messages, packed repeated fields
+
+4. Encoding Techniques // https://protobuf.dev/programming-guides/encoding/
+string values are encoded using UTF-8 character encoding,
+whereas int32 values are encoded using varints.
+- Varints
+Varints (variable length integers) are a method of serializing integers using one or more bytes.
+int32, int64, uint32, uint64, sint32, sint64, bool, enum.
+- For negative integer values, it is recommended to use signed integer types like sint32
+and sint64 because if we use a regular type such as int32 or int64, negative values are
+converted to binary using varints encoding.
+- Nonvarint numbers
+Nonvarint types are just the opposite of the varint type. They allocate a fixed number
+of bytes irrespective of the actual value. Protocol buffers use two wire types that cate‐gorize
+as nonvarint numbers. One is for the 64-bit data types like fixed64, sfixed64,
+and double. The other is for 32-bit data types like fixed32, sfixed32, and float.
+- String type
+In protocol buffers, the string type belongs to the length-delimited wire type, which
+means that the value is a varint-encoded length followed by the specified number of
+bytes of data. String values are encoded using UTF-8 character encoding.
+
+5. gRPC uses a message-framing technique called length-prefix framing.
+Length-prefix is a message-framing approach that writes the size of each message
+before writing the message itself. As you can see in Figure 4-4, before the encoded
+binary message there are 4 bytes allocated to specify the size of the message. In gRPC
+communication, 4 additional bytes are allocated for each message to set its size. The
+size of the message is a finite number, and allocating 4 bytes to represent the message
+size means gRPC communication can handle all messages up to 4 GB in size.
+
+6. In addition to the message size, the frame also has a 1-byte unsigned integer to indi‐
+cate whether the data is compressed or not. A Compressed-Flag value of 1 indicates
+that the binary data is compressed using the mechanism declared in the Message-Encoding header,
+which is one of the headers declared in HTTP transport. The value 0 indicates
+that no encoding of message bytes has occurred.
+
+7. The recipient is the client on the recipient side, once a message is received, it first
+needs to read the first byte to check whether the message is compressed or not. Then
+the recipient reads the next four bytes to get the size of the encoded binary message.
+Once the size is known, the exact length of bytes can be read from the stream. For
+unary/simple messages, we will have only one length-prefixed message, and for
+streaming messages, we will have multiple length-prefixed messages to process.
+
+8.
