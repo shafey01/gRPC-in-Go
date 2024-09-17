@@ -380,3 +380,86 @@
   func(ctx context.Context, desc *StreamDesc, cc *ClientConn,
   method string, streamer Streamer,
   opts ...CallOption) (ClientStream, error)
+
+4. Deadlines
+
+   - Timeouts allow you to specify how long a client application can wait for an RPC to
+     complete before it terminates with an error. A timeout is usually specified as a duration
+     and locally applied at each client side.
+   - For example, a single request may consist of multiple downstream RPCs
+     that chain together multiple services. So we can apply timeouts,
+     relative to each RPC, at each service invocation. Therefore, timeouts cannot
+     be directly applied for the entire life cycle of the request. That’s where we need to use deadlines.
+   - Deadline is expressed in absolute time from the beginning of a request (even if the
+     API presents them as a duration offset) and applied across multiple service invoca‐
+     tions. The application that initiates the request sets the deadline and the entire
+     request chain needs to respond by the deadline.
+   - deadline = current time + offset
+   - A client application can set a deadline when it initiates a connection with a gRPC service.
+     Once the RPC call is made, the client application waits for the duration specified
+     by the deadline; if the response for the RPC call is not received within that time, the
+     RPC call is terminated with a DEADLINE_EXCEEDED error.
+
+5. Cancellation
+
+   - When either the client or server application wants to terminate the RPC this can be done
+     by canceling the RPC. Once the RPC is canceled, no further RPC-related messaging can be
+     done and the fact that one party has canceled the RPC is propagated to the other side.
+   - When one party cancels the RPC, the other party can determine it by checking the
+     context. In this example, the server application can check whether the current context
+     is canceled by using stream.Context().Err() == context.Canceled.
+
+6. Error Handling
+
+   - When an error occurs, gRPC returns one of its error-status codes with an optional
+     error message that provides more details of the error condition. The status object is
+     composed of an integer code and a string message that are common to all gRPC
+     implementations for different languages.
+   - gRPC uses a set of well-defined gRPC-specific status codes. This includes status codes
+     such as the following:
+   - OK: Successful status; not an error.
+   - CANCELLED: The operation was canceled, typically by the caller.
+   - DEADLINE_EXCEEDED: The deadline expired before the operation could complete.
+   - INVALID_ARGUMENT: The client specified an invalid argument.
+
+   - It’s always good practice to use the appropriate gRPC error codes and a richer error
+     model whenever possible for your gRPC applications. gRPC error status and details
+     are normally sent via the trailer headers at the transport protocol level.
+
+7. Multiplexing
+   gRPC allows you to run multiple gRPC services on the same gRPC server,
+   as well as use the same gRPC client connection for multiple gRPC client stubs.
+   This capability is known as multiplexing.
+
+   - Running multiple services or using the same connection between multiple stubs is a
+     design choice that is independent of gRPC concepts. In most everyday use cases such
+     as microservices, it is quite common to not share the same gRPC server instance
+     between two services.
+   - One powerful use for gRPC multiplexing in a microservice architecture is
+     to host multiple major versions of the same service in one
+     server process. This allows a service to accommodate legacy clients
+     after a breaking API change. Once the old version of the service
+     contract is no longer in use, it can be removed from the server.
+
+8. Metadata
+   in certain conditions, you may want to share information about the RPC calls that are
+   not related to the business context of the RPC, so they shouldn’t be part of the RPC
+   arguments. In such cases, you can use gRPC metadata
+   Metadata is structured in the form of a list of key(string)/value pairs.
+
+- One of the most common usages of metadata is to exchange security headers between
+  gRPC applications. Similarly, you can use it to exchange any such information
+  between gRPC applications. Often gRPC metadata APIs are heavily used inside the
+  interceptors that we develop.
+- Reading metadata from either the client or server side can be done using the incoming
+  context of the RPC call with metadata.FromIncomingContext(ctx), which returns the metadata map in Go
+
+9. Name Resolver
+   A name resolver takes a service name and returns a list of IPs of the backends. The
+   resolver used in Example 5-15 resolves lb.example.grpc.io to localhost:50051
+   and localhost:50052.
+
+- Thus, based on this name resolver implementation, you can implement resolvers for
+  any service registry of your choice such as Consul, etcd, and Zookeeper. The gRPC
+  load-balancing requirements may be quite dependent on the deployment patterns
+  that you use or on the use cases.
