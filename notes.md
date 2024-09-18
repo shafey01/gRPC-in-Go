@@ -467,6 +467,7 @@
 10. Load Balancing
     two main load-balancing mechanisms are commonly used in
     gRPC: a load-balancer (LB) proxy and client-side load balancing.
+
     - Load-Balancer Proxy
       In proxy load balancing the client issues RPCs to the LB proxy. Then the
       LB proxy distributes the RPC call to one of the available backend gRPC servers that
@@ -487,3 +488,86 @@
     To use network bandwidth efficiently, use compression when performing RPCs
     between client and services. Using gRPC compression on the client side can be imple‐
     mented by setting a compressor when you do the RPC.
+
+///////////////////////////////////////////////////////////////////////
+// Chapter 06 /////////////////////////////////////////////////////////
+// Secured gRPC ///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+
+1. Authenticating a gRPC Channel with TLS
+   Transport Level Security (TLS) aims to provide privacy and data integrity between two
+   communicating applications. Here, it’s about providing a secure connection between
+   gRPC client and server applications.
+
+2. One-Way Secured Connection
+   In a one-way connection, only the client validates the server to ensure that it receives
+   data from the intended server. When establishing the connection between the client
+   and the server, the server shares its public certificate with the client, who then vali‐
+   dates the received certificate.
+
+3. mTLS Secured Connection
+   The main intent of an mTLS connection between client and server is to have control
+   of clients who connect to the server. Unlike a one-way TLS connection, the server is
+   configured to accept connections from a limited group of verified clients. Here both
+   parties share their public certificates with each other and validate the other party. The
+   basic flow of connection is as follows:
+
+   1. Client sends a request to access protected information from the server.
+   2. The server sends its X.509 certificate to the client.
+   3. Client validates the received certificate through a CA for CA-signed certificates.
+   4. If the verification is successful, the client sends its certificate to the server.
+   5. Server also verifies the client certificate through the CA.
+   6. Once it is successful, the server gives permission to access protected data.
+
+   - server.key
+     Private RSA key of the server.
+   - server.crt
+     Public certificate of the server.
+   - client.key
+     Private RSA key of the client.
+   - client.crt
+     Public certificate of the client.
+   - ca.crt
+     Public certificate of a CA used to sign all public certificates.
+
+4. Authenticating gRPC Calls
+   In order to facilitate verification of the caller, gRPC provides the capability for the cli‐
+   ent to inject his or her credentials (like username and password) on every call. The
+   gRPC server has the ability to intercept a request from the client and check these cre‐
+   dentials for every incoming call.
+
+- Using Basic Authentication
+  is the simplest authentication mechanism. In this mechanism,
+  the client sends requests with the Authorization header with a value that starts with
+  the word Basic followed by a space and a base64-encoded string username:pass
+  word. For example, if the username is admin and the password is admin, the header
+  value looks like this:
+  Authorization: Basic YWRtaW46YWRtaW4=
+- Using OAuth 2.0
+  In the OAuth 2.0 flow, there are four main characters:
+
+  1. the client,
+  2. the authorization server,
+  3. the resource server,
+  4. the resource owner.
+
+- Using JWT
+  JWT defines a container to transport identity information between the client and
+  server. A signed JWT can be used as a self-contained access token, which means the
+  resource server doesn’t need to talk to the authentication server to validate the client
+  token. It can validate the token by validating the signature.
+
+- Using Google Token-Based Authentication
+  Identifying the users and deciding whether to let them use the services deployed on
+  the Google Cloud Platform is controlled by the Extensible Service Proxy (ESP). ESP
+  supports multiple authentication methods, including Firebase, Auth0, and Google ID tokens.
+  In each case, the client needs to provide a valid JWT in their requests. In order to generate
+  authenticating JWTs, we must create a service account for each deployed service.
+
+5. Summary
+   There are two types of credential supports in gRPC, channel and call. Channel cre‐
+   dentials are attached to the channels such as TLS, etc. Call credentials are attached to
+   the call, such as OAuth 2.0 tokens, basic authentication, etc. We even can apply both
+   credential types to the gRPC application. For example, we can have TLS enable the
+   connection between client and server and also attach credentials to each RPC call
+   made on the connection.
