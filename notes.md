@@ -463,3 +463,27 @@
   any service registry of your choice such as Consul, etcd, and Zookeeper. The gRPC
   load-balancing requirements may be quite dependent on the deployment patterns
   that you use or on the use cases.
+
+10. Load Balancing
+    two main load-balancing mechanisms are commonly used in
+    gRPC: a load-balancer (LB) proxy and client-side load balancing.
+    - Load-Balancer Proxy
+      In proxy load balancing the client issues RPCs to the LB proxy. Then the
+      LB proxy distributes the RPC call to one of the available backend gRPC servers that
+      implements the actual logic for serving the call.
+    - Client-Side Load Balancing
+      Rather than having an intermediate proxy layer for load balancing, you can imple‐
+      ment the load-balancing logic at the gRPC client level. In this method, the client is
+      aware of multiple backend gRPC servers and chooses one to use for each RPC.
+      - the load-balancing logic may be entirely developed as part of
+        the client application (also known as thick client) or it can be implemented in a dedi‐
+        cated server known as lookaside load balancer.
+    - There are two load-balancing policies supported in gRPC by default: pick_first and
+      round_robin. pick_first tries to connect to the first address, uses it for all RPCs if it
+      connects, or tries the next address if it fails. round_robin connects to all the addresses
+      it sees and sends an RPC to each backend one at a time in order.
+
+11. Compression
+    To use network bandwidth efficiently, use compression when performing RPCs
+    between client and services. Using gRPC compression on the client side can be imple‐
+    mented by setting a compressor when you do the RPC.
